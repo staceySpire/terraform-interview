@@ -1,6 +1,6 @@
-# terraform-interview
+# terraform-tech-screen
 
-Repo of example terraform for interviews.
+Repo of example terraform for technical screenings.
 
 ## Questions
 
