@@ -1,0 +1,54 @@
+#@data/values
+---
+
+project_name: aws-env
+webhook_token: ((concourse.webhook_token))
+
+versions:
+    concourse_tasks: v2.6.1
+    terraform: 1.0.0
+
+git:
+    repo: nsat/spwx_infra
+    username: ((github.username))
+    personal_access_token: ((github.personal_access_token))
+    main_branch: main
+
+paths:
+    execute_from: aws_environment_terraform
+    lint_from:
+        - aws_environment_terraform
+    main: &path_filter
+        trigger:
+            - aws_environment_terraform
+        ignore: []
+    pr: *path_filter
+
+#! Optional: Remove 'slack' object to disable the Slack integration
+slack:
+    webhook_token: ((slack-app.url))
+    channel: '#alerts'
+
+#! If set to true, when you merge your Terraform changes to your main/master
+#! branch, the changes will be applied automatically.
+enable_auto_apply: true
+
+#! Run from the `paths.execute_from` directory specified earlier, this provides
+#! a hook from which you can run any preparatory commands or scripts before
+#! your Terraform command is run.
+terraform_pre_run_script: |
+    echo "Hello, World!"
+
+#! These should be pairs of env vars and the Concourse syntax for pulling secrets
+#! from Vault or hardcoded configuration values you want to be made available when
+#! Terraform is running.
+#!
+#! Docs here:
+#!   https://www.terraform.io/docs/cli/config/environment-variables.html#tf_var_name
+terraform_env_vars:
+  #! These TF_VAR environment variables are used within the Terraform to
+  #! configure each AWS provider wherever instances of it are created.
+    AWS_ACCESS_KEY_ID: ((concourse-terraform-aws.aws_access_key_id))
+    AWS_SECRET_ACCESS_KEY: ((concourse-terraform-aws.aws_secret_access_key))
+
+  #! Any other env vars required by Terraform here such as AWS credentials etc.
